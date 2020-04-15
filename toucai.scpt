@@ -105,6 +105,9 @@ to main()
         delay 10
     end repeat
 
+    set t to (time string of (current date))
+    log t
+
     return 0
 
 end main
