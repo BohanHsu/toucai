@@ -17,7 +17,7 @@ to refreshSafariWindow(windowIdx)
           -- I found Safari may report closed Privacy window still exist
         end try
     end tell
-end refreshSafariTab
+end refreshSafariWindow
 
 -- Return the number of dom element for select Amazon delivery time slot given a Safari window index.
 -- CSS selector is `div.ufss-slotselect-container > div.ufss-available`
@@ -35,7 +35,7 @@ to getNoSlotWarningContent(windowIdx)
     end tell
 
     return warningContent
-end getH4Content
+end getNoSlotWarningContent
 
 -- Return true iff there are more than zero available slot
 to checkHasSlotInWindow(windowIdx)
