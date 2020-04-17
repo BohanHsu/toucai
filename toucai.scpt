@@ -19,9 +19,9 @@ to refreshSafariWindow(windowIdx)
         end try
     end tell
 
-    log "[main] wait 10 seconds for refreshes to finish"
-    delay 10
-    log "[main] wait 10 finished"
+    log "[refreshSafariWindow] wait 8 seconds for refreshes to finish"
+    delay 8
+    log "[refreshSafariWindow] wait 8 finished"
 
     tell application "Safari"
         set newURL to URL of tab 1 of window windowIdx
@@ -169,7 +169,9 @@ to main()
             
             set refreshWindowIndex to refreshWindowIndex + 1
         end repeat
+        log "[main] wait 10 seconds after check all windows"
         delay 10
+        log "[main] wait 10 seconds finish"
     end repeat
 
     set t to (time string of (current date))
