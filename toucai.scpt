@@ -19,11 +19,23 @@ to refreshSafariWindow(windowIdx)
     end tell
 end refreshSafariWindow
 
+-- Amazon Fresh
 -- Return the number of dom element for select Amazon delivery time slot given a Safari window index.
 -- CSS selector is `div.ufss-slotselect-container > div.ufss-available`
 -- Return the number of dom element in string
-to getNumberOfTimeSlot(windowIdx)
+to getAmazonNumberOfTimeSlot(windowIdx)
     tell application "Safari"
+        set theURL to URL of tab 1 of window windowIdx
+        log "[xbh1]"
+        log theURL
+
+        if theURL starts with "https://www.amazon.com" then
+            log "[xbh1] match amazon"
+        else
+            log "[xbh1] return 0"
+            return "0"
+        end if
+
         tell tab 1 of window windowIdx
             set jsContent to do JavaScript "document.querySelectorAll('div.ufss-slotselect-container > div.ufss-available').length + '';"
             try 
@@ -35,11 +47,23 @@ to getNumberOfTimeSlot(windowIdx)
     end tell
 
     return cntContent
-end getNumberOfTimeSlot
+end getAmazonNumberOfTimeSlot
 
+-- Prime Now
 -- This is my best guess of how to check Prime now slot
-to getInnerFormOfDeliverySlotForm(windowIdx)
+to getPrimeNowInnerFormOfDeliverySlotForm(windowIdx)
     tell application "Safari"
+        set theURL to URL of tab 1 of window windowIdx
+        log "[xbh1]"
+        log theURL
+
+        if theURL starts with "https://primenow.amazon.com" then
+            log "[xbh1] match primenow"
+        else
+            log "[xbh1] return null"
+            return "null"
+        end if
+
         tell tab 1 of window windowIdx
             set jsContent to do JavaScript "document.querySelectorAll('#delivery-slot-form > div')[0]?.getAttribute('role') + '' || 'null';"
             log jsContent
@@ -52,20 +76,20 @@ to getInnerFormOfDeliverySlotForm(windowIdx)
     end tell
 
     return resultContent
-end getInnerFormOfDeliverySlotForm
+end getPrimeNowInnerFormOfDeliverySlotForm
 
 -- Return true iff there are more than zero available slot
 to checkHasSlotInWindow(windowIdx)
-    set slotCnt to getNumberOfTimeSlot(windowIdx)
-    set hasSlot to slotCnt is not "0"
-
     log "[checkHasSlotInWindow]"
     log windowIdx
+    set slotCnt to getAmazonNumberOfTimeSlot(windowIdx)
+    set hasSlot to slotCnt is not "0"
+
     log "After check Amazon"
     log hasSlot 
 
     if not hasSlot then
-        set tryPrimeNow to getInnerFormOfDeliverySlotForm(windowIdx)
+        set tryPrimeNow to getPrimeNowInnerFormOfDeliverySlotForm(windowIdx)
         set hasSlot to tryPrimeNow is not "null"
         log "After check Prime Now"
         log hasSlot
