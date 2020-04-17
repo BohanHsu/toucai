@@ -8,6 +8,7 @@ to refreshSafariWindow(windowIdx)
     log "[refreshSafariWindow]"
     log windowIdx
     tell application "Safari"
+        set oldURL to URL of tab 1 of window windowIdx
         try
           tell tab 1 of window windowIdx
               do JavaScript "location.reload();"
@@ -17,6 +18,15 @@ to refreshSafariWindow(windowIdx)
           -- I found Safari may report closed Privacy window still exist
         end try
     end tell
+
+    log "[main] wait 10 seconds for refreshes to finish"
+    delay 10
+    log "[main] wait 10 finished"
+
+    tell application "Safari"
+        set newURL to URL of tab 1 of window windowIdx
+    end tell
+    return oldURL = newURL
 end refreshSafariWindow
 
 -- Amazon Fresh
@@ -26,13 +36,13 @@ end refreshSafariWindow
 to getAmazonNumberOfTimeSlot(windowIdx)
     tell application "Safari"
         set theURL to URL of tab 1 of window windowIdx
-        log "[xbh1]"
+        log "[debug]"
         log theURL
 
         if theURL starts with "https://www.amazon.com" then
-            log "[xbh1] match amazon"
+            log "[debug] match amazon"
         else
-            log "[xbh1] return 0"
+            log "[debug] return 0"
             return "0"
         end if
 
@@ -54,13 +64,13 @@ end getAmazonNumberOfTimeSlot
 to getPrimeNowInnerFormOfDeliverySlotForm(windowIdx)
     tell application "Safari"
         set theURL to URL of tab 1 of window windowIdx
-        log "[xbh1]"
+        log "[debug]"
         log theURL
 
         if theURL starts with "https://primenow.amazon.com" then
-            log "[xbh1] match primenow"
+            log "[debug] match primenow"
         else
-            log "[xbh1] return null"
+            log "[debug] return null"
             return "null"
         end if
 
@@ -111,6 +121,10 @@ to notifyAvailableSlot()
     display notification "快去买菜！！！" with title "偷菜" subtitle "" sound name "Ping"
 end notifyAvailableSlot
 
+to notifyURLChange()
+    display notification "有网页离开了购物车，请检查" with title "偷菜" subtitle "" sound name "Ping"
+end notifyAvailableSlot
+
 
 to main()
     set numberOfWindow to numberOfSafariWindows()
@@ -121,37 +135,40 @@ to main()
 
     repeat while hasAtLeastOneSlot = false
         log "[main] Another round of loop"
+        set t to (time string of (current date))
+        log t
+
 
         set refreshWindowIndex to 1
 
         repeat while refreshWindowIndex <= numberOfWindow
-            refreshSafariWindow(refreshWindowIndex)
+            set urlIsSame to refreshSafariWindow(refreshWindowIndex)
+            log "[debug] urlIsSame"
+            log urlIsSame
+
+            if not urlIsSame then
+                notifyURLChange()
+                return 0
+            end if
+
+            set hasSlotInWindow to checkHasSlotInWindow(refreshWindowIndex)
+            
+            if hasSlotInWindow then
+
+                set alertTimes to 10
+                repeat alertTimes times
+                    notifyAvailableSlot()
+                    delay 10
+                end repeat
+                
+                set t to (time string of (current date))
+                log t
+
+                return 0
+            end if
+            
             set refreshWindowIndex to refreshWindowIndex + 1
         end repeat
-
-        log "[main] wait 10 seconds for refreshes to finish"
-        delay 10
-        log "[main] wait 10 finished"
-
-
-        set checkWindowIndex to 1
-        repeat while checkWindowIndex <= numberOfWindow
-            set hasSlotInWindow to checkHasSlotInWindow(checkWindowIndex)
-            set hasAtLeastOneSlot to (hasAtLeastOneSlot or hasSlotInWindow)
-            set checkWindowIndex to checkWindowIndex + 1
-        end repeat
-        log "[main] hasAtLeastOneSlot"
-        log hasAtLeastOneSlot
-        
-        
-        if not hasAtLeastOneSlot then
-          delay 10 
-        end if
-    end repeat
-
-    set alertTimes to 3
-    repeat alertTimes times
-        notifyAvailableSlot()
         delay 10
     end repeat
 
