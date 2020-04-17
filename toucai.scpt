@@ -22,29 +22,52 @@ end refreshSafariWindow
 -- Return the number of dom element for select Amazon delivery time slot given a Safari window index.
 -- CSS selector is `div.ufss-slotselect-container > div.ufss-available`
 -- Return the number of dom element in string
-to getNoSlotWarningContent(windowIdx)
+to getNumberOfTimeSlot(windowIdx)
     tell application "Safari"
         tell tab 1 of window windowIdx
             set jsContent to do JavaScript "document.querySelectorAll('div.ufss-slotselect-container > div.ufss-available').length + '';"
             try 
-                set warningContent to jsContent
+                set cntContent to jsContent
             on error number -2753
-                set warningContent to "nowarning"
+                set cntContent to "nowarning"
             end try
         end tell
     end tell
 
-    return warningContent
-end getNoSlotWarningContent
+    return cntContent
+end getNumberOfTimeSlot
+
+to getInnerFormOfDeliverySlotForm(windowIdx)
+    tell application "Safari"
+        tell tab 1 of window windowIdx
+            set jsContent to do JavaScript "document.querySelectorAll('#delivery-slot-form > div')[0]?.getAttribute('role') + '' || 'undefined';"
+            try
+                set resultContent to jsContent
+            on error number -2753
+                set resultContent to "undefined"
+            end try
+        end tell
+    end tell
+
+    return resultContent
+end getInnerFormOfDeliverySlotForm
 
 -- Return true iff there are more than zero available slot
 to checkHasSlotInWindow(windowIdx)
-    set slotCnt to getNoSlotWarningContent(windowIdx)
+    set slotCnt to getNumberOfTimeSlot(windowIdx)
     set hasSlot to slotCnt is not "0"
 
     log "[checkHasSlotInWindow]"
     log windowIdx
+    log "After check Amazon"
     log hasSlot 
+
+    if not hasSlot then
+        set tryPrimeNow to getInnerFormOfDeliverySlotForm(windowIdx)
+        set hasSlot to tryPrimeNow is not "undefined"
+        log "After check Prime Now"
+        log hasSlot
+    end if
     
     return hasSlot
 end checkHasSlotInWindow
@@ -68,7 +91,6 @@ to main()
     log "[main] number of Safari window"
     log numberOfWindow
 
-    set windowIndex to 1
     set hasAtLeastOneSlot to false
 
     repeat while hasAtLeastOneSlot = false
@@ -85,10 +107,12 @@ to main()
         delay 10
         log "[main] wait 10 finished"
 
-        repeat while windowIndex < numberOfWindow
-            set hasSlotInWindow to checkHasSlotInWindow(windowIndex)
+
+        set checkWindowIndex to 1
+        repeat while checkWindowIndex <= numberOfWindow
+            set hasSlotInWindow to checkHasSlotInWindow(checkWindowIndex)
             set hasAtLeastOneSlot to (hasAtLeastOneSlot or hasSlotInWindow)
-            set windowIndex to windowIndex + 1
+            set checkWindowIndex to checkWindowIndex + 1
         end repeat
         log "[main] hasAtLeastOneSlot"
         log hasAtLeastOneSlot
