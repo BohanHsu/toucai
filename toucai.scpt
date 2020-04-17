@@ -37,6 +37,7 @@ to getNumberOfTimeSlot(windowIdx)
     return cntContent
 end getNumberOfTimeSlot
 
+-- This is my best guess of how to check Prime now slot
 to getInnerFormOfDeliverySlotForm(windowIdx)
     tell application "Safari"
         tell tab 1 of window windowIdx
