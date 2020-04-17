@@ -41,11 +41,12 @@ end getNumberOfTimeSlot
 to getInnerFormOfDeliverySlotForm(windowIdx)
     tell application "Safari"
         tell tab 1 of window windowIdx
-            set jsContent to do JavaScript "document.querySelectorAll('#delivery-slot-form > div')[0]?.getAttribute('role') + '' || 'undefined';"
+            set jsContent to do JavaScript "document.querySelectorAll('#delivery-slot-form > div')[0]?.getAttribute('role') + '' || 'null';"
+            log jsContent
             try
                 set resultContent to jsContent
             on error number -2753
-                set resultContent to "undefined"
+                set resultContent to "null"
             end try
         end tell
     end tell
@@ -65,7 +66,7 @@ to checkHasSlotInWindow(windowIdx)
 
     if not hasSlot then
         set tryPrimeNow to getInnerFormOfDeliverySlotForm(windowIdx)
-        set hasSlot to tryPrimeNow is not "undefined"
+        set hasSlot to tryPrimeNow is not "null"
         log "After check Prime Now"
         log hasSlot
     end if
