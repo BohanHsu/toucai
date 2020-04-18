@@ -152,9 +152,9 @@ to main()
             end if
 
             set hasSlotInWindow to checkHasSlotInWindow(refreshWindowIndex)
+            set hasAtLeastOneSlot to hasSlotInWindow
             
             if hasSlotInWindow then
-
                 set alertTimes to 10
                 repeat alertTimes times
                     notifyAvailableSlot()
