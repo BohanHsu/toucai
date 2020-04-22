@@ -100,7 +100,7 @@ to checkHasSlotInWindow(windowIdx)
 
     if not hasSlot then
         set tryPrimeNow to getPrimeNowInnerFormOfDeliverySlotForm(windowIdx)
-        set hasSlot to tryPrimeNow is not "null"
+        set hasSlot to (tryPrimeNow is not "null" and tryPrimeNow is not "undefined")
         log "After check Prime Now"
         log hasSlot
     end if
